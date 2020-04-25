@@ -254,6 +254,34 @@
 - Configure nginx “secure” server blocks
 - Auto renew ssl certs
 
+### DNS and Domain Names
+- A Record: 
+    - Host: @
+    - Value: IP address
+- CNAME Record:
+    - Host: www
+    - Value: domain name
+- In order to access with domain name and www.domai name, set A record and CNAME Record
+- If you want to subdomain, add additional A Record
+    - EX) Host: shop
+    - Value:  Server IP address
+
+### context and directives
+- `directive`: consists of an option and an option value and ends with a semi-colon
+    - server_name domain.com www.domain.com;
+- `context`: also a directive, but it encloses other directives in tis block
+    - Events { worker_connections 767;}
+- 5 main contexts: main, events, http, server, location
+- `main`: main doesn’t have context {}
+-  ‘Context’: open and end with curly bracket {}
+- ‘event`: the events context is contained within the main context it sets Global Options that affect how engine X handles connections.
+- `http`:  The HTTP context is contained in the main text the HTTP context enables and configures the HTTP service in engine X
+- `server`: server context is contained within the HTTP context. The server context contains the configuration for virtual hosts. In Nginx terms,  virtual hosts referred to as the server block
+-  `location`: the location context is contained within the server context. the location context lets you can figure our Nginx will respond to requests for resources with in the server.
+- the location context is contained within the server context.
+
+- When we look at the five main engine X contexts we have main events and HTTP inside the HTTP context you have the server context inside the server context. You have the location context when you look at this diagram the server context is a child of a HTTP and the location context is a child of the server context.
+- When you work with engine X a directive in a child context will override the parent context so child context can override the directives in the parent context.
 
 
 
