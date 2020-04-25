@@ -176,6 +176,87 @@
     - ServerAliveInterval : 60sec
     - ServerAliveCountMax 120
     - if you want to add an additional server. Press enter twice. Host give your server name.
+    
+   
+
+### The firewall
+- Control incoming and outgoing traffic
+- Analyze data packets and determining whether they should be allowed or not
+- Creating IPtable is very complex
+- `sudo ufw status verbose`: check status of ufw
+- `sudo ufw enable | sudo ufw disable`: enable or disable 
+- `sudo ufw default deny incoming | allow outgoing`: default deny | allow rules
+    - `sudo ufw deny incoming`
+    - `sudo ufw allow outgoing`
+- `sudo ufw allow`: ufw allow rules
+    - `sudo ufw allow ssh`
+    - `sudo ufw allow http`
+    - `sudo ufw allow https`
+    - `sudo ufw enable`
+    - `sudo ufw status verbose`
+- Configuration file: ufw
+- Absolute path: /etc/default/ufw
+- Ownership of file: root:root
+
+### Fail2Ban
+- Protect computer from brute force attacks
+- Fail to ban operates by monitoring log files for selected entries and then it runs scripts based on those entries.
+- Blocs selected ip addresses
+- `sudo apt-get install fail2ban`
+- `sudo systemctl restart | start | stop fail2ban`
+- Configuration file: `jail.local` at `/etc/fail2ban/jail.loal
+    - Ownership: root:root
+- Log files
+    - `fail2ban.log`: /var/log
+    - `auth.log` : /var/log
+    - `auth.log`: file the authorization log tracks usage of authorization systems to sodo command, remote logins, among others
+    - Ownership:
+        - `auth.log`: syslog:adm (permission 640)
+        - `fail2ban`: root:adm (permission 640)
+    - Need to add your user to ADM group
+- `cp fail2ban.conf  fail2ban.local`: when it upgrade, we lose fail2ban.conf all we change inside. But fail2ban.local remains the same configuration
+- `sudo usermod -a -G adm <username>`
+- `sudo nano fail2ban.local` at /etc/fail2ban
+    - Under miscellaneous section
+    - `bantime`: how long a particular host is banned for
+        - `findtime`:
+        - `maxretry`: The max retry is the number of failures for a particular host will get banned.
+    - Under Jain section
+        - `sshd`: That is the jail that is protecting S-sh access.
+- `sudo nano default-devian.conf` at /etc/fail2ban/jail.d
+    - It's inside this particular file you specify. If you would like to enable or disable a particular Jayal currently only the SS H-L is an able.
+### Install NGINX, MARIADB, and php7.2
+    - Configuration file: `php.ini` at `/etc/php/7.2/fpm/php.ini
+    - `sudo cp php.ini php.ini.bak`
+    - `sudo nano php.ini`
+        - Search using ctr+W
+        - Search `allow_url_fopen` —> Off
+        - Search `cgi.fix` and uncomment and edit `cgi.fix_pathinfo=0` 
+        - Search `opcahce` and uncomment by removing ‘;’
+        - Change `opcache.memory_consumption=192`
+        - Change `opcache.interned_strings_buffer=16`
+        - `opcache.max_accelerated_files=7963` a prime number
+        - `opcache.validate_timestamps=0` and uncomment
+        - `opcache.revalidate_freq=0`
+    - `sudo systemctl restart php7.2-fpm`
+
+
+### Overview of the NGINX Configuration to follow in the Course
+- Configure nginx.conf
+- Creating site directories
+- Configure nginx server blocks
+- Create database
+- Install wpcli
+- Install WordPress
+- Secure WordPress site using command line
+- Secure WordPress site using nginx directives
+- Create ssl certificate using certbot
+- Configure nginx “secure” server blocks
+- Auto renew ssl certs
+
+
+
+
 
 
 
