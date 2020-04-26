@@ -283,6 +283,125 @@
 - When we look at the five main engine X contexts we have main events and HTTP inside the HTTP context you have the server context inside the server context. You have the location context when you look at this diagram the server context is a child of a HTTP and the location context is a child of the server context.
 - When you work with engine X a directive in a child context will override the parent context so child context can override the directives in the parent context.
 
+### Securing and Optimizing NGINX - Part 1 - The Main Nginx Configuration File
+- `Nginx.conf` at `/etc/nginx/nginx/conf`: 
+-  `sudo nano /etc/nginx/nginx/conf`: edit nginx.conf
+- `lscpu`:  determine number of cpu cores
+- `-ulimit -n`: determine number of worker connections
+- `sudo nginx -t`: test nginx configuration file syntax before reload
+- `sudo sysetemctl reload nginx` or `restart nginx`: reload/ restart nginx
+
+- in the `main context`,
+    -  `worker_processes`we set to the number of CPU cores your server has.
+    - `worker_processes`: 1;
+    - We will be adding `worker_rlimit_nofile` to the main context. We will be adding `worker_rlimit_nofile`  to the main context.This will help prevent that too many files open error that sometimes happens on busy sites.
+    - `worker_rlimit_nofile`: 15000;
+-  In the event context 
+    - we will be modifying the work connections multi accept and `use epoll`.
+    - The work connections value specifiers How many people can simultaneously be served by Nginx  by adding the worker are no file directive to the main context the worker connections directive can be increased beyond the system defaults by
+    - `worker_connections 2048`
+    - enabling multi except it causes engine X to immediately accept as many connections as it can.
+    - `multi_accept on;`
+    - epoll is recommended to increase throughput
+    - `use epoll;`
+- In `http context`
+    -  `server_tokens`:  enables or disables nginx displaying the version of error page and in the server response hit a field.  We will disables theist prevent information leakage 
+    -  `server_tokens off;`
+    - `server_names_bucket_hash_bucket_size` uses hash tables, the size of a table is expressed in brackets. We are going to enable the server names hash packet size directive.
+    - `server_names_bucket_hash_bucket_size 64;`
+    -  2 log files: access_log, error_log
+    - `access log file`: records every single request made to your server. on a busy site, this can translate into huge and resource demands. If you don't need the access log file and for a huge performance boost, disable the access log file.
+    - `access_log off;`
+    - `error_logfile`: The error log file must be kept as it's invaluable for troubleshooting 
+    - `gzip compression`: by using GS compression as it's  that clients are requesting will be compressed. Therefore  smaller and faster to send
+    - `gzip on;`
+- we need to optimize the settings so as not to waste CPU cycles.
+- Please do not attempt to compress asset? that's already compressed.
+- JPEG files are already compressed and by attempting to compress them further you will probably end up with a larger file and you started with 
+- buffers time outs and file handle caching.
+    - If the buffer sizes are too low, Nginx will read and write to disk constantly, thereby reducing performance.
+    - The following four directives will help with buffer sizes
+    - `client_body_buffer_size`:    this reactive handles the client buffer size when Post actions are sent to Nginx.This is when forms are submitted.
+    - `client_body_buffer_size 10k;`
+    - `client_header_buffer_size`:  This directive handles the client header size 
+    - `client_header_buffer_size 1k;`
+    - `client_max_body_size`: This directive specifies the maximum allowed size for a client request. If the size is exceeded engine X will display a request entity too large error large 
+    - `client_max_body_size 8m;`
+    - `large_client_header_buffers`:  This directive ospecifies the maximum number and size of buffers for a large client.
+    - `large_client_header_buffers 1k;`
+- The purpose of servert timeouts is to prevent a device from endlessly waiting for a server to respond
+    - `client_body_timeout` , `client_header_timeout`: These two directors are responsible for how long the server will wait for a client or client data to
+    - be sent after the request 
+    - `client_body_timeout 3m;`
+    - `client_header_timeout 3m`
+    - `keepalive_timeout`: this directive determines the time out for keepalive connections with the client the connection will close after this time period 
+    - `keepalive_timeout 100;`
+    - `send_timeout`:  sets a time out for transmitting a response to the client if the client does not receive anything within this time, The connection is closed 
+    - `send_timeout 3m`
+- `filehandle caching`: Opening a file can be a source of delay.Engine X can maintain a cache of open file descriptors for commonly served files thereby avoiding the delay.
+    - `open_file_cache max=1000 inactive 20s;`
+    - `open_file_cache_valid 30s;`
+    - `open_fiel_cahche_min_uses 5;`
+    - `open_file_cache_errors off;` 
+
+- The file will handle cache does not cache the contents of a file but rather the file descriptors. When you open a file the operating system creates an entry to store information about the open file in the file descriptor table.
+- what the engine X-File handle cache does. It caches the file handles too frequently requested files so this avoids the need for the operating system to reopen them again.
+- The one downside is that engine X takes a little while to react to any changes you have made to any files 
+- in the settings.
+### Securing and Optimizing NGINX - Part 2 - The Main Nginx Configuration File
+- At terminal `lscpu`
+- `ulimit -n`
+- `sudo nano nginx.conf`
+- `sudo nginx -t`
+- `sudo systemctl reload nginx`
+### Securing and Optimizing NGINX - Part 3 - Buffers, Timeouts and the File Handle
+- `open_file_cache max=1500 inactive=30s;` 
+- `open_file_cache_valid 30s;`: nginx cache 1500 files for 30 seconds,  but that excludes any files that haven't been accessed for 30 seconds
+- `open_file_cahce_min_uses 5;`: only files that have been accessed five times in that timeframe.
+- 
+### Creating the WordPress Directories to Store Your Site
+- `server web root`: /var/www
+- `ownership root:root` 
+- `create directories`: <domain name>/public_html
+- `using tree to view directory layout
+- `chown -R user:group /path: changing ownership
+- `mkdir`
+- `mkdir -p`: create directory with sub-directories
+- `sudo apt-get install tree`: install tree
+
+### Configuring NGINX Server Blocks to Display Your WordPress Site - Part 1
+- Configuration file: `default` at `/etc/nginx/sites-available/
+- `sudo cp default default.bak`: create backup copy of the default file
+- `sudo nano default`: open default file 
+- `sudo find / -name php7.0-fpm.sock`: path to php7.0-fpm.sock file
+- `sudo nginx -t`: test nginx configuration file syntax before reload
+- `sudo systemctl reload nginx`: reload nginx
+- 
+
+### Configuring NGINX Server Blocks to Display Your WordPress Site - Part 2
+- Location context is contained with the server context
+- Location context is responsible for how nginx responds to requests for resources within the server
+- Location match defines what nginx should check the requested uniform resources identifier(URI) against
+- Existence of non existence modifier effects the way nginx attempts to match the location block
+- Nginx location modifiers
+    - Engine X processors requests based on whether there is a modifier or not in order of importance the order that engine X will process 
+    - Order-Modifier-explanation
+    - 1 - `=` - `exact match`
+    - 2 - `^~` - preferential prefix match
+    - 3 - `~ and ~*` - regex match: case sensitive and case insensitive match
+    - 4 - - no modifier
+- `exact match`: Site dot com slash favorites icon. In the location context,It says if an exact match for that particular file is made apply the expires directive. expires directive states that that file will be cached for one year.
+- `preferential prefix match`: (^~)  Match is more important than a case sensitive or a case insensitive regular expression. If you have a location context with the carrot tool engine X we'll apply that context even if there is a better match through a regular expression.
+- `case sensitive match` (~):  The tilt is a case sensitive regular expression match.
+- `case insensitive match` (~*): If you look at the location context slash uploads ~* .uploads/.*\.php if somebody happens to upload a malicious PHP script to your server, and they then try and access that file, they will use site.com/uploads/a directory name followed by the name of the script. we are using a case insensitive match for anyone attempting to access a PHP file in your uploads directory. That case insensitive regular expression will match a file typed in uppercase and lowercase and apply the directive.  Deny all. They will not be able to run the HP file in your uploads directory.
+- `no modifier`: no modifier is a prefix match.  how this works is when a request is made to your server,  Nginx will check for the file. Firstly at the url. Then if it doesn't find it. it will then look for a directory to match the request.mIf it doesn't find a file or directory, it then does an internal redirect to index.P P passing the query string arguments as parameters. as we start configuring the various directives inside the server blocks.
+
+### Configuring NGINX Server Blocks to Display Your WordPress Site - Part 3
+- Configuration files:
+    - `default` at `/etc/nginx/sties-available/default`
+    - `domain` at `/etc/nginx/sites-available/domain`
+
+
 
 
 
