@@ -402,6 +402,43 @@
     - `domain` at `/etc/nginx/sites-available/domain`
 
 
+###  Creating Your WordPress Database Using MariaDB - Part 1
+- No phpMyAdmin
+- Login to MariaDB
+- Create the database
+- Give a user privileges on the database
+- The command above will create the database user
+- Flush privileges -refresh database
+- All commands in a semi-colon;
+- Use an apostrophe when needed
+- Use randomly generated characters
+- Generate a list at` random.org`
+
+- `sudo mysql -u root`
+- `show databases;`
+- `create database db_name;`
+- `grant all privileges on db_name.* to ‘db_username’@‘localhost’ identified by ‘password’;
+- `flush privileges`
+- `Show grands for ‘db_username’@‘localhost’;`
+- `drop database db_name;`
+- `drop user db_user;`
+- `Exit`
+
+###  Creating Your WordPress Database Using MariaDB - Part 2
+```
+SITE: domain.com
+
+DATABASE
+————
+Database Name:	j6HkKtAHI3
+Database User:	TtBVLQMVpA
+Database Password:	nOXKFY1DPw
+
+DATABASE COMMANDS
+————————————
+
+create database j6HkKtAHI3; grant all privileges on dynamo.* to ‘db_user’@‘localhost' identified by ‘user passed’; flush privileges;
+```
 
 
 
