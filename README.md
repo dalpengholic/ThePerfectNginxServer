@@ -552,6 +552,22 @@ location ~ ^/wp-includes/theme-compat/ { deny all; }
 - Rotate 28 —> 52: 52 weeks data will be saved
 
 
+### 49. 2019 Update: Secure xmlrpc.php & wp-login.php Using NGINX Rate Limiting
+- Add `limit_req_zone directive` at `/etc/nginx/nginx.conf`
+    - `limit_req_zone $binary_remote_addr zone=one:10m rate=30r/m;
+    - - `limit_req_zone $binary_remote_addr zone=one:10m rate=10r/s;
+    - `zone`: The Zone defines the shared memory zone used to store the state of each IP address and how often it has accessed a request limited URL 10 m means 10 megabytes.
+    - That is the size of a 1 megabyte can hold approximately 16000 unique IP addresses so are 10 megs zone can hold around one hundred and sixty thousand IP addresses.
+    - 10r/s means that 10 requests per second is allowed with a rate of 30 requests per minute.
+- Add `limit_req directive` at rate_limit.conf in `/etc/nginx/includes`
+    - `limit_req zone=one burst=20 nodally;`
+    - `limit_req_status 444;`
+    - The Directive itself limit request enables a rate limiting with in the context where it appears 
+    - The burst parameter defines how many requests a client can make in excess of the rate specified by the zone.
+    - The requests that arrive sooner than what we have specified is put in a queue. Here we are simply setting the queue size to 20. 
+    - This means if 21 requests arrive from a given IP address simultaneously, Nginx forwards the first one to the upstream Server Group immediately and puts the remaining 20 in the queue it then forwards a queued request every two seconds and returns of 5 0 3 era to the client. Only if an incoming request makes the number of queued requests go over 20 
+    - No delay makes sure as soon as a request limit exceeds the HTTP status code 503 is returned to the client 
+    - using limited request status 444 can drop the request and not sent any response back to the user.
 
 
 
