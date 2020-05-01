@@ -430,15 +430,127 @@ SITE: domain.com
 
 DATABASE
 ————
-Database Name:	j6HkKtAHI3
-Database User:	TtBVLQMVpA
-Database Password:	nOXKFY1DPw
+Database Name:	dbname
+Database User:	username
+Database Password:	passed
 
 DATABASE COMMANDS
 ————————————
 
 create database j6HkKtAHI3; grant all privileges on dynamo.* to ‘db_user’@‘localhost' identified by ‘user passed’; flush privileges;
 ```
+
+
+ curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+
+### Create Your First WordPress Site, Quickly and Easily Using WPCLI - Part 1
+- Steps to create a Wordpress site using wp-cli
+    - `wp core download`
+    - `wp core config —dbname= —dbuser= —dbpass= —dbprefix=`: create the wp-config.php file
+        - Do not use wp_ prefix
+        - Double hypen and equal sign
+    - `wp core install —url= —title= —admin_user= —admin_passwd= —admin_email=`: install Wordpress
+    - 
+
+### Secure WordPress Using the Command Line - Part 1
+- `$USER`: the current non-root user you created
+- `www-data`: the web server user
+- `chown -R Woojae-dev:www-data /path/th` == `chown -R $USER:www-data /path/to`
+- wp-config.php
+    - Allow direct updating without ftp of ssh
+    - Direct updating themes and plugins
+    - Disable builtin editor
+- ownership
+    - /var/www/site.com/public_html
+    - `$USER:www-data`
+    - For Commercial themes and plugins, Same as above except /wp-content/
+    - `www-data:www-data`
+- Permissions
+    - /var/www/site.com/public_html
+    - files: 644 and directories: 755
+    - Except wp-content/
+    - Files: 664 and directories: 775
+    - Themes and plugins 
+    - Wp-content/ for commercial themes and plugins
+    - files: 644 and directories: 755
+- `chown -R user:group /path/to/`: change ownership
+    - R: resursively
+    - ouruser: webserber
+- `find /path/to/site -type d -exec chmod 755 {} \;`: using the find command to change directory permissions
+    - /var/www/sitename/public_html
+    - D: for directories
+    - Exec: execute
+- `find /path/to/site -type f -exec chmod 644 {} \;`: using the find command to change directory permissions
+    - F: for files
+###  Secure WordPress Using the Command Line - Part 3
+- It's important that your Wordpress files and directories always have the correct ownership and the correct permissions. when you install a plugin using WP-cli, your permissions will be your user for both the owner and the group. When you use the dashboard the ownership will be the Web servers the owner and the web server is the group.
+- If you log into your dashboard and you cannot delete a plugin, restart the php fpm service that will clear php up cache.
+
+
+###  Secure WordPress Using NGINX Directives - Part 1
+-  Configuration file: 
+    - `nginx.conf` at `/etc/nginx/: ownership root:root
+    - `moimoitest.com` at /etc/nginx/sites-available/: ownership root:root
+    - `.bashrc` at`~/.bashrc`: ownership $USER:$USER
+- `sudo nginx -t`: test nginx configuration file syntax before reload
+- `sudo systemctl reload nginx`
+- Bash alias
+    - Create a shoutout for frequently typed commands
+    - instead typing `sudo nginx -t` —> ngt
+    - `sudo systemctl reload nginx` —> ngr
+    - `Nano ~/.bashrc`: create bash files
+    - `alias ngt=‘sudo nginx -t’: create alias to test Nginx configuration
+    - `alias ngr=‘sudo systemctl reload nginx`: create alias to reload nginx
+    - `alias fpr=‘sudo systemctl restart php7.2-fpm`: create alias to restart php7.2-fpm 
+###  Secure WordPress Using NGINX Directives -Part 2
+- Nginx does not process PHP
+- Nginx passes php to application server (php-fpm)
+- Php-fpm processes the request, then passes the generated http response back to nginx
+- Nginx then sends response back to the browser
+
+- Cgi is the protocol for interfacing external applications to web service .php-fpm is an implementation of the fastcgi protocol because nginx is using var CGI. we need to optimize those settings.
+- `fastcgi_buffer_size`: this directive sets the size of the buffer used for reading the  first part of a response received from the fast CGI server.
+- `fastcgi_buffers`: this directive sets the number and size of the buffer is used for reading a response from fastcgi server for a single connection
+- `fastcgi_busy_buffers_size`: when buffering of responses from the fastcgi serve is enabled, this directive limits the total size of the buffers that can be busy sending a response to the client while the response is not yet fully wait.
+- `fastcgi_temp_file_write_size`: limits the size of data written to a temporary file at a time when buffering of responses from the fastcgi server enabled
+
+- Securing Wordpress using nginx directives
+    - Protect important Wordpress files
+    - Disable php in certain directories
+        - Theme, upload, plugins directories
+    - Filter request methods
+        - Only allow `post`
+    - Filter suspicious query strings
+    - http response headers: headers HTP response headers on name value pairs of strings sent back from the server with a content requested by sending security policies back to the client. It results in a much safer browsing experience for visitors to your site.
+        - `x-frame`: protects visitors against Klik checking attacks the
+        - `x-content type`: X content top directive reduces the risks of drive by downloads.
+        - `x-xss-protection`: configures the Xss protection found in all modern day browsers.
+        - `content-security-policy`: allows you to define a wide list of approved sources for your sites content.
+### Secure WordPress Using NGINX Directives - Part 3
+```
+Protect Important WordPress Files
+
+location = /xmlrpc.php { deny all; }
+location = /wp-admin/install.php { deny all; }
+location ~* /readme\.html$ { deny all; }
+location ~* /readme\.txt$ { deny all; }
+location ~* /licence\.txt$ { deny all; }
+location ~* /license\.txt$ { deny all; }
+location = /wp-config.php { deny all; }
+location ~ ^/wp-admin/includes/ { deny all; }
+location ~ ^/wp-includes/[^/]+\.php$ { deny all; }
+location ~ ^/wp-includes/js/tinymce/langs/.+\.php$ { deny all;}
+location ~ ^/wp-includes/theme-compat/ { deny all; }
+```
+- `location = /xmlrpc.php { deny all; }`: Matching All access is denied at the location of `/xmlrpc.php`  
+- `location ~* /readme\.html$ { deny all; }`:  Incentive matching. All access is denied at the lower case or upper case location of `/xmlrpc.php` 
+
+- When edit `yoursite.com` at `/etc/nginx/sites-available`, the order of include is important
+- Configuring http response headers
+- At `/etc/logrotate.d`, nginx : log rotate file
+- Daily —> weekly
+- Rotate 28 —> 52: 52 weeks data will be saved
+
 
 
 
